@@ -1,0 +1,26 @@
+{
+  "name": "h-queue",
+  "version": "1.0.0",
+  "description": "queue",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hb-bobo/queue.git"
+  },
+  "keywords": [
+    "queue.js"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hb-bobo/queue/issues"
+  },
+  "homepage": "https://github.com/hb-bobo/queue#readme",
+  "devDependencies": {
+    "typescript": "^3.3.3333"
+  }
+}

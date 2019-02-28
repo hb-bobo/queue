@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "lib": ["es6"],
+    "module": "umd",
+    "rootDir": "src",
+    "outDir": "build",
+    "inlineSourceMap": true
+  },
+  "include": ["src/**/*.ts"]
+}
