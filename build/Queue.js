@@ -32,7 +32,7 @@
     * @interface Option {
     *   limit: Number, // 最大处理的个数
     *   autoStart: boolean, // 是否自动开始
-    *   autoPush: boolean, // 完成一个后是否自动添加后面的任务
+    *   autoDoNext: boolean, // 完成一个后是否自动添加后面的任务
     * }
     * @interface QueueItem {
     *   uuid: number | string,
@@ -75,18 +75,18 @@
             this.init(option);
         }
         Queue.prototype.init = function (_a) {
-            var _b = _a === void 0 ? {} : _a, _c = _b.limit, limit = _c === void 0 ? 1 : _c, _d = _b.autoStart, autoStart = _d === void 0 ? true : _d, _e = _b.autoPush, autoPush = _e === void 0 ? true : _e;
+            var _b = _a === void 0 ? {} : _a, _c = _b.limit, limit = _c === void 0 ? 1 : _c, _d = _b.autoStart, autoStart = _d === void 0 ? true : _d, _e = _b.autoDoNext, autoDoNext = _e === void 0 ? true : _e;
             this.limit = limit;
             this.autoStart = autoStart;
-            this.autoPush = autoPush;
+            this.autoDoNext = autoDoNext;
             // 队伍
             this.line = [];
             // 将要处理的队伍(还未处理过的)
-            this.willProcessedLine = [];
+            this.willProcessedQueue = [];
             // 处理中的队伍
-            this.processingLine = [];
+            this.processingQueue = [];
             // 已处理的队伍
-            this.processedLine = [];
+            this.processedQueue = [];
             // 下一个(暂时无用)
             this.nextIndex = -1;
             // event
@@ -96,11 +96,11 @@
          * 获取下一个
          */
         Queue.prototype.getNext = function () {
-            return this.willProcessedLine[0];
+            return this.willProcessedQueue[0];
         };
         /**
          * 清空处理队列
-         * @param {'processingLine' | 'processedLine'} default clear all
+         * @param {'processingQueue' | 'processedQueue'} default clear all
          */
         Queue.prototype.clear = function (type) {
             if (typeof type === 'string' && Array.isArray(this[type])) {
@@ -108,10 +108,10 @@
                 return this[type];
             }
             this.line = [];
-            this.processingLine = [];
-            this.processedLine = [];
+            this.processingQueue = [];
+            this.processedQueue = [];
             this.nextIndex = -1;
-            this.willProcessedLine = [];
+            this.willProcessedQueue = [];
         };
         /**
          * 完成某一个正在处理中的任务
@@ -119,8 +119,8 @@
          * @param { ?boolean }
          * @return {QueueItem | null} 被删除的对象
          */
-        Queue.prototype.done = function (target, autoPush) {
-            return this.removeFromProcessingLine(target, autoPush);
+        Queue.prototype.done = function (target, autoDoNext) {
+            return this.removeFromprocessingQueue(target, autoDoNext);
         };
         /**
          * 处理完成，执行下一个
@@ -131,11 +131,11 @@
                 throw Error('use next() only limit = 1');
             }
             // 添加一个同时要删除一个；
-            if (this.processingLine.length > 0) {
-                this.removeFromProcessingLine(this.processingLine[0]);
+            if (this.processingQueue.length > 0) {
+                this.removeFromprocessingQueue(this.processingQueue[0]);
             }
             if (this.getNext()) {
-                this.pushToProcessingLine(this.getNext());
+                this.pushToprocessingQueue(this.getNext());
             }
         };
         /**
@@ -149,9 +149,9 @@
                 throw TypeError('Queue.push(Function) || Queue.push({uuid: <id>, value: <Function>})');
             }
             var length = this.line.push(item);
-            this.willProcessedLine.push(item);
+            this.willProcessedQueue.push(item);
             if (this.autoStart) {
-                this.pushToProcessingLine(item);
+                this.pushToprocessingQueue(item);
             }
             return length;
         };
@@ -160,22 +160,22 @@
          * @param {QueueItem | function}
          * @return {Number | boolean} length | boolean
          */
-        Queue.prototype.pushToProcessingLine = function (item) {
+        Queue.prototype.pushToprocessingQueue = function (item) {
             var _this = this;
-            var len = this.processingLine.length;
+            var len = this.processingQueue.length;
             if ((typeof item !== 'function' && (item.uuid && typeof item.value !== 'function'))
                 || this.limit === 0
                 || len >= this.limit
-                || this.willProcessedLine.length === 0) {
+                || this.willProcessedQueue.length === 0) {
                 // 处理中队列已满或者待处理队列为空
                 return false;
             }
             // 更新游标
             this.nextIndex++;
             // 1.从待处理队伍中删除item，
-            this.removeFromWillProcessedLine(item);
+            this.removeFromwillProcessedQueue(item);
             // 2.添加item到正在处理队伍中，并执行
-            this.processingLine.push(item);
+            this.processingQueue.push(item);
             // 3.执行任务，接下来可能会立马push.
             var done = function () {
                 _this.done(item);
@@ -186,7 +186,7 @@
             else {
                 item(done);
             }
-            return this.processingLine.length;
+            return this.processingQueue.length;
         };
         /**
          * target
@@ -194,10 +194,10 @@
          * @param { QueueItem | uuid }
          * @param { ?boolean } 是否继续push下一个任务, 当再循环中remove，且会关联一些异步请求或操作，最好设为false,
          */
-        Queue.prototype.remove = function (target, autoPush) {
+        Queue.prototype.remove = function (target, autoDoNext) {
             var index = arrayIndexOf(this.line, target);
-            this.removeFromProcessingLine(target, autoPush);
-            this.removeFromWillProcessedLine(target);
+            this.removeFromprocessingQueue(target, autoDoNext);
+            this.removeFromwillProcessedQueue(target);
             this.line.splice(index, 1);
         };
         /**
@@ -206,21 +206,21 @@
          * @param { ?boolean } 是否继续push下一个任务，
          * @return {QueueItem | null} 被删除的对象
          */
-        Queue.prototype.removeFromProcessingLine = function (target, autoPush) {
-            if (autoPush === void 0) { autoPush = true; }
+        Queue.prototype.removeFromprocessingQueue = function (target, autoDoNext) {
+            if (autoDoNext === void 0) { autoDoNext = true; }
             var delTarget = null;
-            var index = arrayIndexOf(this.processingLine, target);
+            var index = arrayIndexOf(this.processingQueue, target);
             if (index !== -1) {
-                delTarget = this.processingLine[index];
+                delTarget = this.processingQueue[index];
                 // 删除并扔进已处理完的队伍中
-                var delLen = this.processingLine.splice(index, 1);
+                var delLen = this.processingQueue.splice(index, 1);
                 if (delLen > 0) {
-                    this.processedLine.push(delTarget);
+                    this.processedQueue.push(delTarget);
                 }
                 var next = this.getNext();
                 // 删除了一个自动添加
-                if (next && this.autoPush && autoPush) {
-                    this.pushToProcessingLine(next);
+                if (next && this.autoDoNext && autoDoNext) {
+                    this.pushToprocessingQueue(next);
                 }
                 // 没有队列了
                 if (next === undefined) {
@@ -234,13 +234,13 @@
          * @param {QueueItem | uuid} 要删除的对象
          * @return {QueueItem} 被删除的对象
          */
-        Queue.prototype.removeFromWillProcessedLine = function (target) {
+        Queue.prototype.removeFromwillProcessedQueue = function (target) {
             var delTarget = null;
-            var index = arrayIndexOf(this.willProcessedLine, target);
+            var index = arrayIndexOf(this.willProcessedQueue, target);
             if (index !== -1) {
-                delTarget = this.willProcessedLine[index];
+                delTarget = this.willProcessedQueue[index];
                 // 删除
-                this.willProcessedLine.splice(index, 1);
+                this.willProcessedQueue.splice(index, 1);
             }
             return delTarget;
         };
@@ -249,7 +249,7 @@
          */
         Queue.prototype.start = function () {
             if (this.autoStart === false) {
-                while (this.pushToProcessingLine(this.getNext())) {
+                while (this.pushToprocessingQueue(this.getNext())) {
                     // nothing
                 }
             }
