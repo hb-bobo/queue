@@ -1,3 +1,4 @@
+import Events from './events';
 import {
     Config,
     LineType,
@@ -16,15 +17,6 @@ const arrayIndexOf = function (array: QueueItem[], target: QueueItem) {
     return index;
 };
 
-const languages = {en: <'en'>'en', mk: <'mk'>'mk', es: <'es'>'es'};
-type Language = keyof typeof Queue;
-
-
-type LanguageLookup = {[n in Language | string]: Language};
-
-function languageLookup(language: string, lookup: LanguageLookup): Language | undefined {
-    return lookup[language];
-}
 /**
 * 队列
 * @interface Option {
@@ -55,7 +47,7 @@ function languageLookup(language: string, lookup: LanguageLookup): Language | un
 * queue.next();
 */
 
-class Queue {
+class Queue extends Events{
     limit: Config['limit'] = 1;
     autoStart: Config['autoStart'] = true;
     autoDoNext: Config['autoDoNext'] = true;
@@ -69,6 +61,7 @@ class Queue {
     processedQueue: QueueItem[] = [];
     nextIndex: number = -1;
     constructor(option: Config) {
+        super();
         this.init(option);
     }
     init({
@@ -94,11 +87,11 @@ class Queue {
     /**
      * 清空处理队列
      */
-    clear(type: LineType) {
-        if (typeof type === 'string' && type in this) {
-            const queue = this[type];
-            this[type].splice(0, this[type].length - 1);
-            return this[type];
+    clear(type: LineType | 'all') {
+        if (type in this && type !== 'all') {
+            const queue: QueueItem[] = this[type];
+            queue.splice(0, queue.length - 1);
+            return queue;
         }
         this.line = [];
         this.processingQueue = [];
@@ -209,7 +202,7 @@ class Queue {
             }
             // 没有队列了
             if (next === undefined) {
-                this.onend();
+                this.dispatchEvent('end');
             }
         }
         return delTarget;
