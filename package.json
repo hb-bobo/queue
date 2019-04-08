@@ -4,7 +4,7 @@
   "description": "queue",
   "main": "index.js",
   "scripts": {
-    "build": "tsc && rollup build -f dist",
+    "build": "tsc && rollup build/Queue.js -f dist",
     "test": "jest"
   },
   "repository": {
