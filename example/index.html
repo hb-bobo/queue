@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <script src="../dist/queue.js"></script>
+    <script>
+        console.log(Queue)
+    var queue1 = new Queue({ limit: 2 });
+    for(var i = 0; i < 20; i++) {
+        queue1.push(function (done) {
+            setTimeout(function() {
+                done();
+                console.log('item done')
+            }, 100 * i);
+        });
+    }
+    var onEnd = function () {
+        console.log(['Handle done']);
+    };
+    queue1.on('end', onEnd)    
+    // queue1.start()
+    </script>
+</body>
+</html>
