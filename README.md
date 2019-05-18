@@ -1,12 +1,14 @@
 
 # Queue.js 📬
 
-<!-- # Installation -->
-
+## Installation
+```bash
+npm install hb-queue
+```
 ## Example
 
 ```ts
-import Queue from './Queue';
+import Queue from 'hb-queue';
 // 多个队列并行
 const queue = new Queue({ limit: 5 });
 const queueItem = (done: () => void) => {
