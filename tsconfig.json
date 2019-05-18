@@ -1,14 +1,12 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
     "strict": true,
-    "lib": ["es6", "dom"],
-    "module": "umd",
+    "lib": ["es5", "dom"],
+    "module": "ESNext",
     "rootDir": "src",
-    "outDir": "build",
-    "inlineSourceMap": true,
+    "outDir": "es",
+    "inlineSourceMap": false,
     "noImplicitAny": true,
   },
   "include": ["src/**/*.ts", "__test__/test.spec.ts"]

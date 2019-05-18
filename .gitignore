@@ -1,7 +1,8 @@
 # See https://help.github.com/ignore-files/ for more about ignoring files.
 /dist
+/es
 # dependencies
-/node_modules
+node_modules
 
 #vscodeconfig
 /.vscode
@@ -12,7 +13,7 @@
 .env.development.local
 .env.test.local
 .env.production.local
-
+.rpt2_cache
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

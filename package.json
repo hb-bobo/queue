@@ -1,11 +1,13 @@
 {
-  "name": "h-queue",
-  "version": "1.0.0",
+  "name": "hb-queue",
+  "version": "1.0.2",
   "description": "queue",
-  "main": "index.js",
+  "main": "dist/queue.js",
   "scripts": {
-    "build": "tsc && rollup build/Queue.js -f dist",
-    "test": "jest"
+    "build:es": "tsc",
+    "build:min": "rollup -c --environment INCLUDE_DEPS,BUILD:production",
+    "test": "jest",
+    "prepublish": "npm run build:es & npm run build:min"
   },
   "repository": {
     "type": "git",
@@ -21,14 +23,23 @@
   },
   "homepage": "https://github.com/hb-bobo/queue#readme",
   "devDependencies": {
+    "@babel/core": "^7.4.4",
+    "@babel/parser": "^7.4.4",
+    "@babel/preset-env": "^7.4.4",
+    "@babel/types": "^7.4.4",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-preset-latest": "^6.24.1",
+    "jest": "^24.8.0",
+    "rollup": "^1.12.2",
+    "rollup-plugin-babel": "^4.3.2",
+    "rollup-plugin-node-resolve": "^5.0.0",
+    "rollup-plugin-typescript2": "^0.21.1",
+    "rollup-plugin-uglify": "^6.0.2",
+    "ts-jest": "^23.10.5",
     "tslint": "^5.14.0",
     "typescript": "^3.3.3333"
   },
   "dependencies": {
-    "@babel/types": "^7.4.0",
-    "@types/jest": "^24.0.11",
-    "jest": "^23.6.0",
-    "rollup": "^1.9.0",
-    "ts-jest": "^23.10.5"
+    "@types/jest": "^24.0.11"
   }
 }
