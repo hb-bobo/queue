@@ -201,7 +201,7 @@ class Queue extends Events{
                 this.pushToprocessingQueue(next);
             }
             // 没有队列了
-            if (next === undefined) {
+            if (next === undefined && this.processingQueue.length === 0) {
                 this.dispatchEvent('end');
             }
         }
