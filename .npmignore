@@ -13,6 +13,7 @@ __test__
 npm-debug.log
 .npmrc
 node_modules
+example
 config.gypi
 *.orig
 package-lock.json
